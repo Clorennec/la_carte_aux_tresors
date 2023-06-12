@@ -12,7 +12,11 @@ class PagePrincipale extends StatefulWidget {
 class _PagePrincipaleState extends State<PagePrincipale> {
   List<Marker> _marqueurs = [];
 
-  void ajouterMarqueur(LatLng position, String id, String titre) {}
+  void ajouterMarqueur(LatLng position, String id, String titre) {
+    Marker marqueurTemp =
+        Marker(markerId: MarkerId(id), infoWindow: InfoWindow(title: titre));
+    _marqueurs.add(marqueurTemp);
+  }
 
   static const CameraPosition position = CameraPosition(
     target: LatLng(50.611256, 3.134842),
