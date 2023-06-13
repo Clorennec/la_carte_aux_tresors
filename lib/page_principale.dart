@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:la_carte_aux_tresors/gestion_donnees.dart';
 
 class PagePrincipale extends StatefulWidget {
   const PagePrincipale({super.key});
@@ -10,12 +13,29 @@ class PagePrincipale extends StatefulWidget {
 }
 
 class _PagePrincipaleState extends State<PagePrincipale> {
-  List<Marker> _marqueurs = [];
+  final List<Marker> _marqueurs = [];
 
-  void ajouterMarqueur(LatLng position, String id, String titre) {
-    Marker marqueurTemp =
-        Marker(markerId: MarkerId(id), infoWindow: InfoWindow(title: titre));
-    _marqueurs.add(marqueurTemp);
+  void _ajouterMarqueur(LatLng position, String id, String titre) {
+    BitmapDescriptor marqueurIcon;
+    if (id == 'positionCourante') {
+      // Marqueur pour la position actuelle
+      marqueurIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
+    } else {
+      // Autres marqueurs
+      marqueurIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
+    }
+    final infoWindow = InfoWindow(title: titre);
+    final marqueur = Marker(
+      markerId: MarkerId(id),
+      position: position,
+      icon: marqueurIcon,
+      infoWindow: infoWindow,
+    );
+    setState(() {
+      _marqueurs.add(marqueur);
+    });
   }
 
   static const CameraPosition position = CameraPosition(
@@ -29,7 +49,10 @@ class _PagePrincipaleState extends State<PagePrincipale> {
         appBar: AppBar(
           title: const Text('Carte aux trésors'),
         ),
-        body: const GoogleMap(initialCameraPosition: position));
+        body: GoogleMap(
+          initialCameraPosition: position,
+          markers: Set.of(_marqueurs),
+        ));
   }
 
   Future<LatLng> _lirePositionActuelle() async {
@@ -56,11 +79,21 @@ class _PagePrincipaleState extends State<PagePrincipale> {
     } else {
       return position.target;
     }
+  }
 
-    @override
-    void initState() {
-      super.initState();
-      LatLng enplacement = _lirePositionActuelle() as LatLng;
-    }
+  @override
+  void initState() {
+    super.initState();
+    chargerLieuxDansFirebase();
+    _lirePositionActuelle().then((position) {
+      final LatLng positionActuelle =
+          LatLng(position.latitude, position.longitude);
+      print(positionActuelle);
+      _ajouterMarqueur(
+          positionActuelle, 'positionCourante', 'Position Actuelle');
+    }).catchError((error) {
+      print('Erreur lors de la récupération de la position actuelle: $error');
+    });
+    print(position.target.toString());
   }
 }
