@@ -3,6 +3,8 @@ import 'package:la_carte_aux_tresors/modeles/lieu.dart';
 import 'package:la_carte_aux_tresors/utilitaires/gestion_donnees.dart';
 
 class DialogueLieu extends StatelessWidget {
+  final GestionBdD bdd = GestionBdD();
+
   final TextEditingController txtDes = TextEditingController();
   final TextEditingController txtAdresse = TextEditingController();
   final TextEditingController txtLat = TextEditingController();
@@ -43,9 +45,9 @@ class DialogueLieu extends StatelessWidget {
                     lieu.latitude = double.parse(txtLat.text);
                     lieu.longitude = double.parse(txtLon.text);
                     if (estNouveau) {
-                      GestionBdD.ajouterLieu(lieu.toMap());
+                      bdd.ajouterLieu(lieu.toMap());
                     } else {
-                      GestionBdD.modifierLieu(lieu.idLieu, lieu.toMap());
+                      bdd.modifierLieu(lieu.idLieu, lieu.toMap());
                     }
                     Navigator.pop(context);
                   })

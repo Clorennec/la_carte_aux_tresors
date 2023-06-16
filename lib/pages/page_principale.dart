@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -105,7 +107,7 @@ class _PagePrincipaleState extends State<PagePrincipale> {
                       longitude: currentLatLng.longitude,
                       date: DateTime.now(),
                       idLieu: '',
-                      idUtilisateur: '');
+                      idUtilisateur: 'utilisateur1');
                   DialogueLieu dialogueLieu =
                       DialogueLieu(estNouveau: true, lieu: lieu);
                   await showDialog(
@@ -113,7 +115,18 @@ class _PagePrincipaleState extends State<PagePrincipale> {
                     builder: (BuildContext context) =>
                         dialogueLieu.build(context),
                   );
+                  _marqueurs.clear();
+                  _determinePosition();
+                  chargerDonneesDepuisFirebase('utilisateur1').then((snapshot) {
+                    setState(() {
+                      lieux = extraireLieux(snapshot);
+                      _actualiserPosition();
+                    });
+                  }).catchError((error) {
+                    print('Erreur lors de la récupération des lieux : $error');
+                  });
                 },
+                child: const Icon(Icons.add_location),
               ))
         ],
       ),
@@ -145,15 +158,13 @@ class _PagePrincipaleState extends State<PagePrincipale> {
     return await Geolocator.getCurrentPosition();
   }
 
-  @override
-  initState() {
-    super.initState();
+  List<Lieu> extraireLieux(QuerySnapshot snapshot) {
+    return snapshot.docs
+        .map((doc) => Lieu.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+        .toList();
+  }
 
-    chargerLieuxDansFirebase().then((_) {
-      // Données insérées avec succès, vous pouvez effectuer d'autres opérations ici si nécessaire
-    }).catchError((error) {
-      print('''Erreur lors de l'insertion des lieux : $error''');
-    });
+  void _actualiserPosition() async {
     _determinePosition().then((pos) {
       print(
           '===========================> lat ${pos.latitude} / lon ${pos.longitude}');
@@ -161,6 +172,13 @@ class _PagePrincipaleState extends State<PagePrincipale> {
     }).catchError((error) {
       print('Erreur lors de la récupération de la position actuelle: $error');
     });
+  }
+
+  @override
+  initState() {
+    super.initState();
+
+    _actualiserPosition();
 
     chargerDonneesDepuisFirebase('utilisateur1').then((snapshot) {
       setState(() {
@@ -169,11 +187,5 @@ class _PagePrincipaleState extends State<PagePrincipale> {
     }).catchError((error) {
       print('Erreur lors de la récupération des lieux : $error');
     });
-  }
-
-  List<Lieu> extraireLieux(QuerySnapshot snapshot) {
-    return snapshot.docs
-        .map((doc) => Lieu.fromMap(doc.id, doc.data() as Map<String, dynamic>))
-        .toList();
   }
 }
