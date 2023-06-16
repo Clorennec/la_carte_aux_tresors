@@ -1,9 +1,9 @@
 class Lieu {
   final String idLieu;
   final String idUtilisateur;
-  final String designation;
-  final double latitude;
-  final double longitude;
+  late String designation;
+  double latitude;
+  double longitude;
   String photo;
   String adresse;
   DateTime date;
