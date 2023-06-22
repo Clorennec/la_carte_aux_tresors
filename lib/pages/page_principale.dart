@@ -1,11 +1,10 @@
 // ignore_for_file: avoid_print
 
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:la_carte_aux_tresors/pages/gerer_lieux.dart';
 import 'package:la_carte_aux_tresors/utilitaires/gestion_donnees.dart';
 import 'package:la_carte_aux_tresors/modeles/lieu.dart';
 
@@ -55,6 +54,25 @@ class _PagePrincipaleState extends State<PagePrincipale> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Carte aux trésors'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GererLieux()),
+                ).then((value) {
+                  _marqueurs.clear();
+                  _determinePosition();
+                  chargerDonneesDepuisFirebase('utilisateur1').then((snapshot) {
+                    setState(() {
+                      lieux = extraireLieux(snapshot);
+                      _actualiserPosition();
+                    });
+                  });
+                });
+              },
+              icon: const Icon(Icons.list))
+        ],
       ),
       body: FutureBuilder<QuerySnapshot>(
           future: chargerDonneesDepuisFirebase('utilisateur1'),
@@ -127,7 +145,7 @@ class _PagePrincipaleState extends State<PagePrincipale> {
                   });
                 },
                 child: const Icon(Icons.add_location),
-              ))
+              )),
         ],
       ),
     );

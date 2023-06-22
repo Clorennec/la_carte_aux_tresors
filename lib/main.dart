@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:la_carte_aux_tresors/pages/page_connexion.dart';
-import 'package:la_carte_aux_tresors/pages/page_principale.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +12,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: PagePrincipale());
+    return const MaterialApp(
+        title: 'La carte aux trésors', home: PageConnexion());
   }
 }
